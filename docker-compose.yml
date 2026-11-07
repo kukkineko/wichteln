@@ -1,0 +1,7 @@
+services:
+  wichteln:
+    image: ghcr.io/GITHUB_USER/wichteln:latest
+    container_name: wichteln
+    restart: unless-stopped
+    ports:
+      - "8085:80"
