@@ -3,5 +3,9 @@ services:
     image: ghcr.io/GITHUB_USER/wichteln:latest
     container_name: wichteln
     restart: unless-stopped
+    environment:
+      ADMIN_PASSWORD: "AENDERN"
     ports:
       - "8085:80"
+    volumes:
+      - ./data:/data

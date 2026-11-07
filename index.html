@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
 <title>Wichteln</title>
 <style>
-  :root { --bg:#0f2a1d; --card:#fff8ee; --ink:#2b2118; --red:#c0392b; --gold:#e0a82e; }
+  :root { --bg:#0f2a1d; --card:#fff8ee; --ink:#2b2118; --red:#c0392b; }
   * { box-sizing: border-box; }
   body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
          background: radial-gradient(circle at top, #1d5037, var(--bg)); font-family: system-ui, sans-serif; color:var(--ink); padding:16px; }
@@ -14,7 +15,7 @@
   h1 { margin:0 0 4px; font-size:1.8rem; }
   p { line-height:1.4; }
   textarea, input { width:100%; padding:10px; border:2px solid #d9c9b0; border-radius:10px; font:inherit; background:#fff; }
-  textarea { min-height:120px; resize:vertical; }
+  textarea { min-height:110px; resize:vertical; }
   label { display:block; text-align:left; font-weight:600; margin:14px 0 6px; }
   small { color:#7a6a58; display:block; text-align:left; margin-top:4px; }
   button { background:var(--red); color:#fff; border:0; border-radius:12px; padding:12px 18px; font:inherit; font-weight:700; cursor:pointer; }
@@ -27,148 +28,147 @@
   .result { font-size:2.2rem; font-weight:800; color:var(--red); margin:18px 0; animation:pop .5s ease; }
   @keyframes pop { from { transform:scale(.2); opacity:0 } to { transform:scale(1); opacity:1 } }
   .hidden { display:none; }
-  .warn { background:#fff0c9; border-radius:10px; padding:8px; font-size:.9rem; margin-top:12px; }
+  .warn { background:#fff0c9; border-radius:10px; padding:10px; font-size:.95rem; margin-top:12px; text-align:left; }
+  hr { border:0; border-top:1px solid #eadfcc; margin:20px 0 4px; }
 </style>
 </head>
 <body>
 <div class="card">
 
-  <!-- Seite fuer den Organisator -->
+  <!-- Organisator -->
   <div id="admin">
     <h1>🎁 Wichteln</h1>
-    <p>Namen eintragen, auslosen, jedem seinen privaten Link per WhatsApp schicken.</p>
-    <div class="warn" style="margin:0 0 6px;text-align:left">
-      <b>Schritt 1 (optional): Wünsche sammeln.</b> Schick der Gruppe diesen Link. Jeder trägt Name + Wünsche ein und schickt dir das Ergebnis per WhatsApp zurück.
-      <button class="alt" id="copyWish" style="margin-top:8px">Wunsch-Link kopieren</button>
+    <div id="login">
+      <p>Organisator-Login</p>
+      <input id="pw" type="password" placeholder="Admin-Passwort">
+      <button class="big" id="loginBtn">Anmelden</button>
     </div>
-    <label for="pasted">Zurückgeschickte Wunsch-Nachrichten hier einfügen</label>
-    <textarea id="pasted" style="min-height:70px" placeholder="Einfach alle Nachrichten der Gruppe hineinkopieren"></textarea>
-    <button class="alt" id="parse" style="margin-top:8px">Namen &amp; Wünsche übernehmen</button>
-    <small id="parsed"></small>
-    <label for="names">Teilnehmer (einer pro Zeile)</label>
-    <textarea id="names" placeholder="Anna&#10;Ben&#10;Chris&#10;Dana"></textarea>
-    <label for="excl">Nicht ziehen dürfen (optional)</label>
-    <textarea id="excl" style="min-height:60px" placeholder="Anna-Ben&#10;(z.B. Paare, einer pro Zeile)"></textarea>
-    <small>"Anna-Ben" heißt: Anna zieht nicht Ben und Ben nicht Anna.</small>
-    <button class="big" id="go">Auslosen</button>
-    <div id="out" class="hidden">
-      <p class="warn">Du siehst hier <b>nicht</b>, wer wen gezogen hat. Tippe bei jedem Namen auf „WhatsApp“ und wähle dann genau diese Person aus.</p>
-      <div id="list"></div>
+    <div id="panel" class="hidden">
+      <p>Namen eintragen, auslosen, jedem seinen privaten Link per WhatsApp schicken.</p>
+      <label for="names">Teilnehmer (einer pro Zeile)</label>
+      <textarea id="names" placeholder="Anna&#10;Ben&#10;Chris&#10;Dana"></textarea>
+      <label for="excl">Nicht ziehen dürfen (optional)</label>
+      <textarea id="excl" style="min-height:60px" placeholder="Anna-Ben"></textarea>
+      <small>"Anna-Ben" heißt: Anna zieht nicht Ben und Ben nicht Anna.</small>
+      <button class="big" id="go">Auslosen</button>
+      <div id="out" class="hidden">
+        <p class="warn">Du siehst hier <b>nicht</b>, wer wen gezogen hat. Tippe bei jedem Namen auf „WhatsApp“ und wähle dann genau diese Person aus.</p>
+        <div id="list"></div>
+      </div>
+      <hr>
+      <button class="alt" id="existing" style="margin-top:12px">Bestehende Links anzeigen</button>
+      <small>Eine neue Auslosung ersetzt die alte. Die Wünsche bleiben erhalten.</small>
     </div>
-    <div id="fileWarn" class="warn hidden">Die Seite muss online liegen (z.B. Netlify Drop), sonst funktionieren die Links bei den anderen nicht.</div>
   </div>
 
-  <!-- Wunschformular -->
-  <div id="wishPage" class="hidden">
-    <h1>🎄 Dein Wunschzettel</h1>
-    <p>Trag ein, was du dir wünschst, damit dein Wichtel Anhaltspunkte hat.</p>
-    <label for="wname">Dein Name</label>
-    <input id="wname" placeholder="z.B. Anna">
-    <label for="wtext">Das wünsche ich mir</label>
-    <textarea id="wtext" placeholder="z.B. Kerzen, ein gutes Buch, Socken, Schokolade…"></textarea>
-    <button class="big" id="sendWish">Per WhatsApp abschicken</button>
-    <small>Die Nachricht geht an den Organisator. Dein Wichtel sieht sie später beim Aufdecken.</small>
-  </div>
-
-  <!-- Seite fuer die Teilnehmer -->
-  <div id="reveal" class="hidden">
+  <!-- Teilnehmer -->
+  <div id="me" class="hidden">
     <h1>🎅 Hallo <span id="who"></span>!</h1>
     <p>Du beschenkst dieses Jahr:</p>
     <div id="hidden"><button class="big" id="show">Aufdecken</button></div>
     <div id="shown" class="hidden">
       <div class="result" id="target"></div>
-      <div id="wishBox" class="warn hidden" style="text-align:left"><b>Das wünscht sich <span id="wishName"></span>:</b><br><span id="wishText" style="white-space:pre-wrap"></span></div>
+      <div class="warn"><b>Das wünscht sich <span id="tname"></span>:</b><br>
+        <span id="twish" style="white-space:pre-wrap"></span></div>
       <p>Pssst, nicht verraten! 🤫</p>
     </div>
+    <hr>
+    <label for="mywish">Dein eigener Wunschzettel</label>
+    <textarea id="mywish" placeholder="z.B. Kerzen, ein gutes Buch, Socken, Schokolade…"></textarea>
+    <button class="alt big" id="saveWish">Speichern</button>
+    <small id="saved"></small>
   </div>
 
+  <p id="err" class="warn hidden"></p>
 </div>
 <script>
 const $ = id => document.getElementById(id);
-const enc = o => btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(o))));
-const dec = s => JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(s), c => c.charCodeAt(0))));
+const token = new URLSearchParams(location.search).get('t');
+const showErr = m => { $('err').textContent = m; $('err').classList.remove('hidden'); };
 
-// --- Teilnehmer-Ansicht, wenn der Link ein Ergebnis enthaelt ---
-const wishes = {};
-const base = location.origin + location.pathname;
-const h = location.hash;
-
-if (h === '#wunsch') {
-  $('admin').classList.add('hidden');
-  $('wishPage').classList.remove('hidden');
-  $('sendWish').onclick = () => {
-    const n = $('wname').value.trim(), w = $('wtext').value.trim();
-    if (!n || !w) return alert('Bitte Name und Wunsch eintragen.');
-    const msg = `🎁 Mein Wunschzettel (Wichteln): ${base}#w=${encodeURIComponent(enc({ n, w }))}`;
-    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-  };
-}
-$('copyWish').onclick = async () => {
-  await navigator.clipboard.writeText(`🎄 Wichteln: Trag hier deine Wünsche ein: ${base}#wunsch`);
-  $('copyWish').textContent = 'Kopiert ✓';
-};
-$('parse').onclick = () => {
-  const found = [...$('pasted').value.matchAll(/#w=([A-Za-z0-9%+\/=_-]+)/g)];
-  let c = 0;
-  found.forEach(m => { try { const d = dec(decodeURIComponent(m[1])); wishes[d.n] = d.w; c++; } catch (e) {} });
-  const cur = $('names').value.split('\n').map(s => s.trim()).filter(Boolean);
-  $('names').value = [...new Set([...cur, ...Object.keys(wishes)])].join('\n');
-  $('parsed').textContent = c + ' Wunschzettel übernommen.';
-};
-
-if (h.startsWith('#los=')) {
-  try {
-    const d = dec(decodeURIComponent(h.slice(5)));
-    $('admin').classList.add('hidden');
-    $('reveal').classList.remove('hidden');
-    $('who').textContent = d.g;
-    $('show').onclick = () => {
-      $('target').textContent = d.r;
-      if (d.w) { $('wishName').textContent = d.r; $('wishText').textContent = d.w; $('wishBox').classList.remove('hidden'); }
-      $('hidden').classList.add('hidden');
-      $('shown').classList.remove('hidden');
-    };
-  } catch (e) { /* ungueltiger Link: Admin-Seite zeigen */ }
-}
-if (location.protocol === 'file:') $('fileWarn').classList.remove('hidden');
-
-// --- Auslosen ---
-function draw(names, banned) {
-  const bad = (a, b) => a === b || banned.has(a + '|' + b);
-  for (let t = 0; t < 5000; t++) {
-    const p = [...names];
-    for (let i = p.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
-    if (names.every((n, i) => !bad(n, p[i]))) return p;
-  }
-  return null;
-}
-
-$('go').onclick = () => {
-  const names = [...new Set($('names').value.split('\n').map(s => s.trim()).filter(Boolean))];
-  if (names.length < 3) return alert('Mindestens 3 Teilnehmer nötig.');
-  const banned = new Set();
-  $('excl').value.split('\n').forEach(l => {
-    const [a, b] = l.split('-').map(s => s.trim());
-    if (a && b) { banned.add(a + '|' + b); banned.add(b + '|' + a); }
+async function api(method, url, data, admin) {
+  const r = await fetch(url, {
+    method, headers: { 'Content-Type': 'application/json', ...(admin ? { 'x-admin': admin } : {}) },
+    body: data ? JSON.stringify(data) : undefined
   });
-  const res = draw(names, banned);
-  if (!res) return alert('Mit diesen Regeln geht die Auslosung nicht auf. Lockere die Ausschlüsse.');
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || 'Fehler');
+  return j;
+}
 
+// ---------- Teilnehmer ----------
+if (token) {
+  $('admin').classList.add('hidden');
+  let editing = false, revealed = false;
+  const load = async first => {
+    try {
+      const d = await api('GET', '/api/me?t=' + encodeURIComponent(token));
+      $('me').classList.remove('hidden');
+      $('who').textContent = d.name;
+      $('tname').textContent = d.target;
+      $('twish').textContent = d.targetWish || 'Noch kein Wunsch eingetragen.';
+      if (first) $('mywish').value = d.myWish;
+      $('target').textContent = d.target;
+    } catch (e) { showErr(e.message); }
+  };
+  $('mywish').oninput = () => { editing = true; $('saved').textContent = ''; };
+  $('show').onclick = () => { revealed = true; $('hidden').classList.add('hidden'); $('shown').classList.remove('hidden'); };
+  $('saveWish').onclick = async () => {
+    try {
+      await api('PUT', '/api/wish?t=' + encodeURIComponent(token), { wish: $('mywish').value });
+      editing = false; $('saved').textContent = 'Gespeichert ✓ (dein Wichtel sieht es sofort)';
+    } catch (e) { showErr(e.message); }
+  };
+  load(true);
+  setInterval(() => load(false), 15000); // Wuensche des Beschenkten aktualisieren sich von selbst
+}
+
+// ---------- Organisator ----------
+let adminPw = sessionStorage.getItem('adminPw') || '';
+const link = t => location.origin + location.pathname + '?t=' + t;
+
+function renderList(people) {
   $('list').innerHTML = '';
-  names.forEach((n, i) => {
-    const link = base + '#los=' + encodeURIComponent(enc({ g: n, r: res[i], w: wishes[res[i]] || '' }));
-    const msg = `Hallo ${n}! 🎁 Hier kannst du sehen, wen du beim Wichteln beschenkst (nicht weitersagen): ${link}`;
+  people.forEach(p => {
+    const msg = `Hallo ${p.name}! 🎁 Hier siehst du, wen du beim Wichteln beschenkst, und kannst deinen Wunschzettel eintragen (nicht weitersagen): ${link(p.token)}`;
     const row = document.createElement('div');
     row.className = 'row';
     row.innerHTML = `<span></span><div><button class="alt">WhatsApp</button><button>Link</button></div>`;
-    row.querySelector('span').textContent = n;
+    row.querySelector('span').textContent = p.name;
     const [wa, cp] = row.querySelectorAll('button');
     wa.onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     cp.onclick = async () => { await navigator.clipboard.writeText(msg); cp.textContent = 'Kopiert ✓'; };
     $('list').appendChild(row);
   });
   $('out').classList.remove('hidden');
-};
+}
+
+async function enter() {
+  try {
+    const d = await api('GET', '/api/admin/list', null, adminPw);
+    sessionStorage.setItem('adminPw', adminPw);
+    $('login').classList.add('hidden');
+    $('panel').classList.remove('hidden');
+    $('err').classList.add('hidden');
+    if (d.people.length) $('names').value = d.people.map(p => p.name).join('\n');
+    return d.people;
+  } catch (e) { sessionStorage.removeItem('adminPw'); showErr(e.message); }
+}
+if (!token) {
+  $('loginBtn').onclick = () => { adminPw = $('pw').value; enter(); };
+  $('pw').onkeydown = e => { if (e.key === 'Enter') $('loginBtn').click(); };
+  if (adminPw) enter();
+  $('existing').onclick = async () => { const p = await enter(); if (p && p.length) renderList(p); else showErr('Noch keine Auslosung.'); };
+  $('go').onclick = async () => {
+    const names = $('names').value.split('\n').map(s => s.trim()).filter(Boolean);
+    if (!confirm('Jetzt auslosen? Eine bestehende Auslosung wird ersetzt und alte Links werden ungültig.')) return;
+    try {
+      const d = await api('POST', '/api/admin/draw', { names, excl: $('excl').value.split('\n') }, adminPw);
+      $('err').classList.add('hidden');
+      renderList(d.people);
+    } catch (e) { showErr(e.message); }
+  };
+}
 </script>
 </body>
 </html>
