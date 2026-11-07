@@ -1,6 +1,6 @@
 services:
   wichteln:
-    image: ghcr.io/GITHUB_USER/wichteln:latest
+    image: ghcr.io/kukkineko/wichteln:latest
     container_name: wichteln
     restart: unless-stopped
     environment:

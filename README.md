@@ -9,6 +9,6 @@ Kleine Wichtel-Seite: Auslosung, private Links per WhatsApp, Wunschzettel mit Li
 Organisator: Startseite oeffnen, Admin-Passwort eingeben. Teilnehmer bekommen `?t=<token>`-Links.
 
 ## TrueNAS
-Apps -> Discover -> Custom App: Image `ghcr.io/<user>/wichteln`, Tag `latest`, Port 8085 -> 80,
+Apps -> Discover -> Custom App: Image `ghcr.io/kukkineko/wichteln`, Tag `latest`, Port 8085 -> 80,
 Umgebungsvariable `ADMIN_PASSWORD`, Storage: Host Path (z.B. /mnt/nas/wichteln) -> `/data`.
 Fuer die Links an die Gruppe muss die Seite von aussen erreichbar sein (Reverse Proxy / Cloudflare Tunnel, am besten mit HTTPS).
